@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ghost-blog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ghost-blog
+  template:
+    metadata:
+      labels:
+        app: ghost-blog
+    spec:
+      containers:
+        - name: ghost
+          image: ghost:latest
+          ports:
+            - containerPort: 2368
+          env:
+            - name: database__client
+              value: sqlite3
+          volumeMounts:
+            - name: ghost-data
+              mountPath: /var/lib/ghost/content
+      volumes:
+        - name: ghost-data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ghost-service
+spec:
+  selector:
+    app: ghost-blog
+  ports:
+    - port: 80
+      targetPort: 2368
+  type: NodePort
